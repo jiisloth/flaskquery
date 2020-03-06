@@ -29,7 +29,8 @@ def index():
             if settings.form_close < nowtime:
                 open = False
     else:
-        return render_template('empty.html')
+        return render_template('empty.html',
+                           appurl=appurl)
 
 
     if team_form.validate_on_submit():
