@@ -1,23 +1,34 @@
 from app import db
 
-class Model(db.Model):
+
+class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
-    name = db.Column(db.String(64))
+    team = db.Column(db.String(64))
+    captain = db.Column(db.String(64))
+    player1 = db.Column(db.String(64))
+    player2 = db.Column(db.String(64))
+    medic = db.Column(db.String(64))
     mail = db.Column(db.String(64))
-    operator = db.Column(db.Boolean())
-    alcohol = db.Column(db.String(64))
-    wine = db.Column(db.String(64))
-    beer = db.Column(db.String(64))
-    specialneeds = db.Column(db.String(500))
-    gdpr = db.Column(db.Boolean())
-    avec = db.Column(db.Boolean())
-    avec_name = db.Column(db.String(64))
-    avec_alcohol = db.Column(db.String(64))
-    avec_wine =  db.Column(db.String(64))
-    avec_beer = db.Column(db.String(64))
-    avec_specialneeds = db.Column(db.String(500))
-    avec_gdpr = db.Column(db.Boolean())
+    guild = db.Column(db.String(64))
+    timestamp = db.Column(db.DateTime())
 
-    datetime = db.Column(db.DateTime())
+
+class Settings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(1024))
+
+    place = db.Column(db.String(64))
+    time = db.Column(db.String(64))
+
+    ask_medic = db.Column(db.Boolean())
+    ask_guild = db.Column(db.Boolean())
+    ask_mail = db.Column(db.Boolean())
+
+
+    alcoholdisclaimer = db.Column(db.Boolean())
+
+    form_open = db.Column(db.DateTime())
+    form_close = db.Column(db.DateTime())
+
+    teams_needed = db.Column(db.Integer)
 

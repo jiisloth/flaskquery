@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for
 from app import app, db
-from app.forms import Form
-from app.models import Model
+from app.forms import Team_form, Settings_form, Reset_form
+from app.models import Settings, Team
 from datetime import datetime
 from flask_basicauth import BasicAuth
 import os
@@ -13,53 +13,36 @@ basic_auth = BasicAuth(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    form = Form()
+    team_form = Team_form()
 
-    teekkaritime = datetime(2019, 10, 30, 13, 37, 00)
-    endtime = datetime(2019, 11, 4, 11, 59, 59)
+    teams = Team.query.all()
+    settings = Settings.query.first()
+
     nowtime = datetime.now()
 
-
-    entries_temp = Model.query.all()
-
-    entries = []
-
-    for entry in entries_temp:
-        if entry.gdpr:
-            entries.append({"name": entry.name, "avec": False, "operator": entry.operator})
-        else:
-            entries.append({"name": "Remminorsu", "avec": False, "operator": entry.operator})
-
-        if entry.avec:
-            if entry.avec_gdpr:
-                entries.append({"name": entry.avec_name, "avec": True})
-            else:
-                entries.append({"name": "Norsuavec", "avec": True})
+    open = True
+    if settings:
+        if settings.form_open:
+            if settings.form_open > nowtime:
+                open = False
+        if settings.form_close:
+            if settings.form_close < nowtime:
+                open = False
+    else:
+        return render_template('empty.html')
 
 
-
-
-
-
-    if form.validate_on_submit():
+    if team_form.validate_on_submit():
         flash('Kiitos ilmoittautumisesta!')
-        sub = Model(
-            name=form.name.data,
-            mail = form.mail.data,
-            operator = form.operator.data,
-            alcohol = form.alcohol.data,
-            wine = form.wine.data,
-            beer = form.beer.data,
-            specialneeds = form.specialneeds.data,
-            gdpr = form.gdpr.data,
-            avec = form.avec.data,
-            avec_name = form.avec_name.data,
-            avec_alcohol = form.avec_alcohol.data,
-            avec_wine = form.avec_wine.data,
-            avec_beer = form.avec_beer.data,
-            avec_specialneeds = form.avec_specialneeds.data,
-            avec_gdpr = form.avec_gdpr.data,
-            datetime = nowtime
+        sub = Team(
+            team=team_form.team.data,
+            captain=team_form.captain.data,
+            player1=team_form.player1.data,
+            player2=team_form.player2.data,
+            medic=team_form.medic.data,
+            mail=team_form.mail.data,
+            guild=team_form.guild.data,
+            timestamp=nowtime
         )
         db.session.add(sub)
         db.session.commit()
@@ -69,8 +52,73 @@ def index():
 
     return render_template('index.html',
                            appurl=appurl,
-                           teekkaritime=teekkaritime,
-                           endtime=endtime,
-                           nowtime=nowtime,
-                           entries=entries,
-                           form=form)
+                           teams=teams,
+                           open=open,
+                           settings=settings,
+                           team_form=team_form)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@basic_auth.required
+def admin():
+    team_form = Team_form()
+    settings_form = Settings_form()
+    reset = Reset_form()
+
+    teams = Team.query.all()
+    settings = Settings.query.first()
+
+
+    nowtime = datetime.now()
+
+    if reset.submit_reset.data and reset.validate_on_submit():
+        flash('ILMO NOLLATTU')
+        db.session.query(Settings).delete()
+        db.session.query(Team).delete()
+        db.session.commit()
+        return redirect(appurl + "/admin")
+
+
+    if settings_form.submit_settings.data and settings_form.validate_on_submit():
+        flash('ASETUKSET MUOKATTU!')
+        db.session.query(Settings).delete()
+        sub = Settings(
+            text=settings_form.text.data,
+            place=settings_form.place.data,
+            time=settings_form.time.data,
+            ask_medic=settings_form.ask_medic.data,
+            ask_guild=settings_form.ask_guild.data,
+            ask_mail=settings_form.ask_mail.data,
+            form_open=settings_form.form_open.data,
+            form_close=settings_form.form_close.data,
+            alcoholdisclaimer=settings_form.alcoholdisclaimer.data,
+            teams_needed=settings_form.teams_needed.data
+        )
+        db.session.add(sub)
+        db.session.commit()
+        return redirect(appurl + "/admin")
+
+    if team_form.submit_team.data and team_form.validate_on_submit():
+        flash('Kiitos ilmoittautumisesta!')
+        sub = Team(
+            team=team_form.team.data,
+            captain=team_form.captain.data,
+            player1=team_form.player1.data,
+            player2=team_form.player2.data,
+            medic=team_form.medic.data,
+            mail=team_form.mail.data,
+            guild=team_form.guild.data,
+            timestamp=nowtime
+        )
+        db.session.add(sub)
+        db.session.commit()
+        return redirect(appurl)
+
+    return render_template('admin.html',
+                           appurl=appurl,
+                           teams=teams,
+                           settings=settings,
+                           reset=reset,
+                           settings_form=settings_form,
+                           team_form=team_form,
+                           nowtime=nowtime)

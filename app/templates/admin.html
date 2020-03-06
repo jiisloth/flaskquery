@@ -1,0 +1,118 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% extends "headers.html" %}
+
+{% block content %}
+    <div class="container">
+        <h1>ASETUKSET:</h1>
+        kello on nyt {{ nowtime }}
+        <form class="form form-horizontal" method="post" role="form">
+
+                {{ settings_form.hidden_tag() }}
+                {{ wtf.form_field(settings_form.text) }}
+                default:
+                    <p>
+                        KiltaHione Fuckers eli KHF perustuu Galaxy Truckers peliin. KHF:ssa rakennetaan mahdollisimman viihtyisä kiltahuone, joka houkuttelisi paikalle mahdollisimman paljon kiltalaisa eli fukseja, Teekkareita ja jarruja opiskeluvuoden aikana. Peli kestää siis yhden lukuvuoden, joka on jaettu neljään kauteen: syksy, talvi, kevät ja Wappu. Jokainen kausi on koostuu huutokaupasta ja kymmenestä satunnaiseventistä, jotka kuvastavat kauden tapahtumia. Jokaisen kauden jälkeen kiltalaisista saa pisteitä. Eniten pisteitä omaava joukkue Wapun jälkeen voittaa pelin.
+
+                    </p>
+
+                {{ wtf.form_field(settings_form.place) }}
+
+                {{ wtf.form_field(settings_form.time) }}
+
+                {{ wtf.form_field(settings_form.ask_medic) }}
+
+                {{ wtf.form_field(settings_form.ask_mail) }}
+
+                {{ wtf.form_field(settings_form.ask_guild) }}
+
+                {{ wtf.form_field(settings_form.form_open) }}
+
+                {{ wtf.form_field(settings_form.form_close) }}
+
+                {{ wtf.form_field(settings_form.teams_needed) }}
+
+                {{ wtf.form_field(settings_form.alcoholdisclaimer) }}
+            KiltaHione Fuckers pelissä juodaan alkoholia. Pääosin juoman määrä on joukkueen itsensä hallittavissa, mutta myös joitakin "pakollisia" juotavia on luvassa.<br>
+                Peliin tarvitsette yhteensä joukkueelle 48 x 0.33 III olutta tai vastaavaa sekä muutaman desin 40% viinaa. Määrä on suuri jotta juoma ei loppuisi kesken. (Ylimääräiset voi aina viedä kotiin!)<br>
+
+                {{ wtf.form_field(settings_form.submit_settings) }}
+            </form>
+            <h2>Tyhjennä ilmo:</h2>
+            <form class="form form-horizontal" method="post" role="form">
+
+                {{ reset.hidden_tag() }}
+
+                {{ wtf.form_field(reset.submit_reset) }}
+            </form>
+
+        <h1>ILMOITTAUTUNEET:</h1>
+
+        <h2>Osallistujat {% if settings.teams_needed %}{{ teams|length }}/{{ settings.teams_needed }}{% endif %}</h2>
+        <div class="row">
+            <div class="col-sm-6">
+                {% for entry in teams %}
+                    <h3>{{ loop.index }}. {{ entry.name }}
+                        {% if settings.teams_needed %}{% if loop.index > settings.teams_needed %}(Varasijalla)
+                        {% endif %}{% endif %}</h3>
+                    <p>
+                        {{ entry.captain }}, {{ entry.player1 }}, {{ entry.player2 }}
+                        <br>
+                        {{ entry.medic }}
+                        <br>
+                        {{ entry.guild }}
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <h1>ILMO NÄYTTÄÄ TÄLTÄ:</h1>
+
+        <p>
+            {{ settings.text }}
+        </p>
+        <ul>
+            <li>
+                Mitä? <b>KiltaHione Fuckers</b>
+            </li>
+            {% if settings.place %}
+                <li>
+                    Missä? <b>{{ settings.place }}</b>
+                </li>
+            {% endif %}
+            {% if settings.time %}
+                <li>
+                    Milloin? <b>{{ settings.time }}</b>
+                </li>
+            {% endif %}
+        </ul>
+
+        <h2>Ilmoittautuminen</h2>
+        <form class="form form-horizontal" method="post" role="form">
+
+           {{ team_form.hidden_tag() }}
+                {{ wtf.form_field(team_form.team) }}
+
+                {{ wtf.form_field(team_form.captain) }}
+
+                {{ wtf.form_field(team_form.player1) }}
+
+                {{ wtf.form_field(team_form.player2) }}
+                {% if settings.ask_medic %}
+                    {{ wtf.form_field(team_form.medic) }}
+                {% endif %}
+                {% if settings.ask_mail %}
+                    {{ wtf.form_field(team_form.mail) }}
+                {% endif %}
+                {% if settings.ask_guild %}
+                    {{ wtf.form_field(team_form.guild) }}
+                {% endif %}
+                {{ wtf.form_field(team_form.consent) }}
+
+                {{ wtf.form_field(team_form.submit_team) }}
+        </form>
+
+        <a href="{{ appurl }}/static/tietosuojaseloste.pdf" target="_blank">Tietosuojaseloste</a>
+
+    </div>
+{% endblock %}
